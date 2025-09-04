@@ -6,6 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 class NetworkService {
     val client: HttpClient = HttpClient {
@@ -15,5 +16,11 @@ class NetworkService {
         install(ContentNegotiation) {
             json()
         }
+    }
+
+    val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        explicitNulls = false
     }
 }

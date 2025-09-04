@@ -1,7 +1,9 @@
 package com.tabac.rickandmorty.presentation
 
 import androidx.lifecycle.ViewModel
+import com.tabac.rickandmorty.domain.model.CharactersDataModel
 import com.tabac.rickandmorty.domain.usecase.GetCharactersUseCase
+import com.tabac.rickandmorty.network.DataStatus
 import com.tabac.rickandmorty.ui.model.toCharacterUiModel
 import com.tabac.rickandmorty.utils.AppLogger
 import kotlinx.coroutines.CoroutineScope
@@ -23,8 +25,21 @@ class CharactersViewModel(
     fun getCharacters() {
         val scope = CoroutineScope(Dispatchers.IO)
         scope.launch {
-            val characters = getCharactersUseCase.getAllCharacters().map { it.toCharacterUiModel() }
-            _uiState.update { CharactersViewState.Success(characters) }
+            val charactersDataModel = getCharactersUseCase.getAllCharacters()
+            parseAndEmitCharactersData(charactersDataModel)
+        }
+    }
+
+    private fun parseAndEmitCharactersData(charactersDataModel: CharactersDataModel) {
+        when(charactersDataModel.dataStatus) {
+            DataStatus.Error -> {
+                _uiState.update { CharactersViewState.Error("Error fetching characters") }
+            }
+            DataStatus.Success -> {
+                val characters = charactersDataModel.characters.map { it.toCharacterUiModel() }
+                _uiState.update { CharactersViewState.Success(characters) }
+            }
+            else -> {}
         }
     }
 }
